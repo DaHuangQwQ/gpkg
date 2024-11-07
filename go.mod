@@ -1,4 +1,4 @@
-module gpkg
+module github.com/DaHuangQwQ/gpkg
 
 go 1.22
 
