@@ -1,8 +1,8 @@
 package ginx
 
 import (
+	"github.com/DaHuangQwQ/gpkg/logger"
 	"github.com/gin-gonic/gin"
-	"gpkg/logger"
 	"net/http"
 	"reflect"
 )

@@ -8,12 +8,12 @@ import (
 	"sync"
 	"time"
 	//"gbff/api"
-	"gpkg/ginx"
-	"gpkg/gormx/connpool"
-	"gpkg/logger"
-	"gpkg/migrator"
-	"gpkg/migrator/events"
-	"gpkg/migrator/validator"
+	"github.com/DaHuangQwQ/gpkg/ginx"
+	"github.com/DaHuangQwQ/gpkg/gormx/connpool"
+	"github.com/DaHuangQwQ/gpkg/logger"
+	"github.com/DaHuangQwQ/gpkg/migrator"
+	"github.com/DaHuangQwQ/gpkg/migrator/events"
+	"github.com/DaHuangQwQ/gpkg/migrator/validator"
 )
 
 // Scheduler 用来统一管理整个迁移过程

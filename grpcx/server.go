@@ -2,11 +2,11 @@ package grpcx
 
 import (
 	"context"
+	"github.com/DaHuangQwQ/gpkg/logger"
+	"github.com/DaHuangQwQ/gpkg/netx"
 	clientv3 "go.etcd.io/etcd/client/v3"
 	"go.etcd.io/etcd/client/v3/naming/endpoints"
 	"google.golang.org/grpc"
-	"gpkg/logger"
-	"gpkg/netx"
 	"net"
 	"strconv"
 	"time"

@@ -1,7 +1,7 @@
 package ginx
 
 import (
-	"gpkg/ginx/api"
+	"github.com/DaHuangQwQ/gpkg/ginx/api"
 	"reflect"
 )
 

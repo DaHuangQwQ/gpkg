@@ -3,10 +3,10 @@ package fixer
 import (
 	"context"
 	"errors"
+	"github.com/DaHuangQwQ/gpkg/migrator"
+	"github.com/DaHuangQwQ/gpkg/migrator/events"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	"gpkg/migrator"
-	"gpkg/migrator/events"
 )
 
 type Fixer[T migrator.Entity] struct {

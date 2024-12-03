@@ -2,9 +2,9 @@ package validator
 
 import (
 	"context"
+	"github.com/DaHuangQwQ/gpkg/logger"
+	events2 "github.com/DaHuangQwQ/gpkg/migrator/events"
 	"gorm.io/gorm"
-	"gpkg/logger"
-	events2 "gpkg/migrator/events"
 	"time"
 )
 

@@ -2,12 +2,12 @@ package validator
 
 import (
 	"context"
+	"github.com/DaHuangQwQ/gpkg/logger"
+	"github.com/DaHuangQwQ/gpkg/migrator"
+	"github.com/DaHuangQwQ/gpkg/migrator/events"
 	"github.com/ecodeclub/ekit/slice"
 	"golang.org/x/sync/errgroup"
 	"gorm.io/gorm"
-	"gpkg/logger"
-	"gpkg/migrator"
-	"gpkg/migrator/events"
 	"time"
 )
 

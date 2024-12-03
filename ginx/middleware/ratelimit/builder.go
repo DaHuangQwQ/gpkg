@@ -3,8 +3,8 @@ package ratelimit
 import (
 	_ "embed"
 	"fmt"
+	"github.com/DaHuangQwQ/gpkg/ratelimit"
 	"github.com/gin-gonic/gin"
-	"gpkg/ratelimit"
 	"log"
 	"net/http"
 )
