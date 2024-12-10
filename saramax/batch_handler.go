@@ -14,6 +14,7 @@ type BatchHandler[T any] struct {
 	l  logger.Logger
 }
 
+// NewBatchHandler kafka 批量消费
 func NewBatchHandler[T any](l logger.Logger, fn func(msgs []*sarama.ConsumerMessage, ts []T) error) *BatchHandler[T] {
 	return &BatchHandler[T]{fn: fn, l: l}
 }
