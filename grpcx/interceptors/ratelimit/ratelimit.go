@@ -12,10 +12,10 @@ import (
 type InterceptorBuilder struct {
 	limiter limit.Limiter
 	key     string
-	l       logger.LoggerV1
+	l       logger.Logger
 }
 
-func NewInterceptorBuilder(limiter limit.Limiter, key string, l logger.LoggerV1) *InterceptorBuilder {
+func NewInterceptorBuilder(limiter limit.Limiter, key string, l logger.Logger) *InterceptorBuilder {
 	return &InterceptorBuilder{limiter: limiter, key: key, l: l}
 }
 

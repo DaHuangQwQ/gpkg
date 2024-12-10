@@ -23,11 +23,11 @@ var (
 type DoubleWritePool struct {
 	src     gorm.ConnPool
 	dst     gorm.ConnPool
-	l       logger.LoggerV1
+	l       logger.Logger
 	pattern *atomicx.Value[string]
 }
 
-func NewDoubleWritePool(src gorm.ConnPool, dst gorm.ConnPool, l logger.LoggerV1) *DoubleWritePool {
+func NewDoubleWritePool(src gorm.ConnPool, dst gorm.ConnPool, l logger.Logger) *DoubleWritePool {
 	return &DoubleWritePool{
 		src:     src,
 		dst:     dst,
@@ -144,7 +144,7 @@ type DoubleWritePoolTx struct {
 	src     *sql.Tx
 	dst     *sql.Tx
 	pattern string
-	l       logger.LoggerV1
+	l       logger.Logger
 }
 
 func (d *DoubleWritePoolTx) Commit() error {

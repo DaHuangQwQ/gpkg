@@ -16,7 +16,7 @@ type baseValidator struct {
 	// 修复数据需要知道
 	direction string
 
-	l        logger.LoggerV1
+	l        logger.Logger
 	producer events2.Producer
 }
 

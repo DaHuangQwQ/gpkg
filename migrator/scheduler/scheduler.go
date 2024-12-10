@@ -23,7 +23,7 @@ type Scheduler[T migrator.Entity] struct {
 	src        *gorm.DB
 	dst        *gorm.DB
 	pool       *connpool.DoubleWritePool
-	l          logger.LoggerV1
+	l          logger.Logger
 	pattern    string
 	cancelFull func()
 	cancelIncr func()
@@ -34,7 +34,7 @@ type Scheduler[T migrator.Entity] struct {
 }
 
 func NewScheduler[T migrator.Entity](
-	l logger.LoggerV1,
+	l logger.Logger,
 	src *gorm.DB,
 	dst *gorm.DB,
 	// 这个是业务用的 DoubleWritePool

@@ -2,6 +2,7 @@ package redisx
 
 import (
 	"context"
+	"errors"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/redis/go-redis/v9"
 	"net"
@@ -13,6 +14,7 @@ type PrometheusHook struct {
 	vector *prometheus.SummaryVec
 }
 
+// NewPrometheusHook redis prometheus 可观测性
 func NewPrometheusHook(opt prometheus.SummaryOpts) *PrometheusHook {
 	return &PrometheusHook{
 		vector: prometheus.NewSummaryVec(opt, []string{"cmd", "key_exist"}),
@@ -31,7 +33,7 @@ func (p *PrometheusHook) ProcessHook(next redis.ProcessHook) redis.ProcessHook {
 		var err error
 		defer func() {
 			duration := time.Since(start).Milliseconds()
-			keyExists := err == redis.Nil
+			keyExists := errors.Is(redis.Nil, err)
 			p.vector.WithLabelValues(cmd.Name(), strconv.FormatBool(keyExists)).
 				Observe(float64(duration))
 		}()

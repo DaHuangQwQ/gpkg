@@ -7,54 +7,6 @@ import (
 
 var Paths = make(map[string]api.Path)
 
-//func DocGen(req any) {
-//	var (
-//		path       string
-//		title      string
-//		oper       *api.Operation
-//		parameters []api.Parameter
-//	)
-//	t := reflect.TypeOf(req)
-//	for i := 0; i < t.NumField(); i++ {
-//		field := t.Field(i)
-//		if field.Name == "Meta" {
-//			path = field.Tag.Get("path")
-//			title = field.Tag.Get("title")
-//		} else {
-//			parameters = append(parameters, api.Parameter{
-//				Name:     field.Tag.Get("json"),
-//				In:       getParameterLocation(field),
-//				Required: field.Tag.Get("required") == "true",
-//				Schema: api.Schema{
-//					Type: getJSONType(field.Type),
-//				},
-//			})
-//		}
-//
-//		// 打印字段名和对应的 JSON 标签
-//		//fmt.Printf("Field Name: %s， Type : %s, JSON Tag: %s\n", field.Name, field.Type, field.Tag.Get("json"))
-//	}
-//	oper = &api.Operation{
-//		Summary:    title,
-//		Parameters: parameters,
-//		Responses: map[string]api.Response{
-//			"200": {
-//				Description: "A list of users",
-//				Content: map[string]api.MediaType{
-//					"application/json": {
-//						Schema: api.Schema{
-//							Type: "array", // 返回的是一个用户数组
-//						},
-//					},
-//				},
-//			},
-//		},
-//	}
-//	Paths[path] = api.Path{
-//		Get: oper,
-//	}
-//}
-
 func DocGen(req any) {
 	var (
 		path       string

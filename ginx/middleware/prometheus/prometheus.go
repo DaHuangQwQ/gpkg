@@ -15,6 +15,7 @@ type Builder struct {
 	Help       string
 }
 
+// BuildResponseTime 相应时间
 func (b *Builder) BuildResponseTime() gin.HandlerFunc {
 	// pattern 是指命中的路由
 	labels := []string{"method", "pattern", "status"}
@@ -51,6 +52,7 @@ func (b *Builder) BuildResponseTime() gin.HandlerFunc {
 	}
 }
 
+// BuildActiveRequest 请求数
 func (b *Builder) BuildActiveRequest() gin.HandlerFunc {
 	gauge := prometheus.NewGauge(prometheus.GaugeOpts{
 		Namespace: b.Namespace,

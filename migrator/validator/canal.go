@@ -16,7 +16,7 @@ func NewCanalIncrValidator[T migrator.Entity](
 	base *gorm.DB,
 	target *gorm.DB,
 	direction string,
-	l logger.LoggerV1,
+	l logger.Logger,
 	producer events2.Producer,
 ) *CanalIncrValidator[T] {
 	return &CanalIncrValidator[T]{

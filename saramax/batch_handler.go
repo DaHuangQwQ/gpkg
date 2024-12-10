@@ -11,10 +11,10 @@ import (
 
 type BatchHandler[T any] struct {
 	fn func(msgs []*sarama.ConsumerMessage, ts []T) error
-	l  logger.LoggerV1
+	l  logger.Logger
 }
 
-func NewBatchHandler[T any](l logger.LoggerV1, fn func(msgs []*sarama.ConsumerMessage, ts []T) error) *BatchHandler[T] {
+func NewBatchHandler[T any](l logger.Logger, fn func(msgs []*sarama.ConsumerMessage, ts []T) error) *BatchHandler[T] {
 	return &BatchHandler[T]{fn: fn, l: l}
 }
 

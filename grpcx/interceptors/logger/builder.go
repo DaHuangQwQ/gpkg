@@ -13,11 +13,11 @@ import (
 )
 
 type InterceptorBuilder struct {
-	l logger.LoggerV1
+	l logger.Logger
 	interceptors.Builder
 }
 
-func NewInterceptorBuilder(l logger.LoggerV1) *InterceptorBuilder {
+func NewInterceptorBuilder(l logger.Logger) *InterceptorBuilder {
 	return &InterceptorBuilder{l: l}
 }
 

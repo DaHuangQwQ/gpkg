@@ -22,7 +22,7 @@ type Server struct {
 	etcdKey     string
 	cancel      func()
 	Name        string
-	L           logger.LoggerV1
+	L           logger.Logger
 }
 
 // Serve 启动服务器并且阻塞

@@ -16,7 +16,7 @@ type Validator[T migrator.Entity] struct {
 	target    *gorm.DB
 	direction string
 	producer  events.Producer
-	l         logger.LoggerV1
+	l         logger.Logger
 	batchSize int
 
 	uTime         int64
@@ -24,7 +24,7 @@ type Validator[T migrator.Entity] struct {
 	fromBase      func(ctx context.Context, offset int) (T, error)
 }
 
-func NewValidator[T migrator.Entity](base *gorm.DB, target *gorm.DB, direction string, l logger.LoggerV1, p events.Producer) *Validator[T] {
+func NewValidator[T migrator.Entity](base *gorm.DB, target *gorm.DB, direction string, l logger.Logger, p events.Producer) *Validator[T] {
 	res := &Validator[T]{
 		base:          base,
 		target:        target,

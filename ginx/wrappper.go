@@ -7,9 +7,9 @@ import (
 	"reflect"
 )
 
-var L logger.LoggerV1
+var L logger.Logger
 
-func NewWarpLogger(l logger.LoggerV1) {
+func NewWarpLogger(l logger.Logger) {
 	L = l
 }
 

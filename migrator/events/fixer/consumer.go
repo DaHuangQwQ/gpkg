@@ -15,7 +15,7 @@ import (
 
 type Consumer[T migrator.Entity] struct {
 	client   sarama.Client
-	l        logger.LoggerV1
+	l        logger.Logger
 	srcFirst *fixer.Fixer[T]
 	dstFirst *fixer.Fixer[T]
 	topic    string
@@ -23,7 +23,7 @@ type Consumer[T migrator.Entity] struct {
 
 func NewConsumer[T migrator.Entity](
 	client sarama.Client,
-	l logger.LoggerV1,
+	l logger.Logger,
 	topic string,
 	src *gorm.DB,
 	dst *gorm.DB) (*Consumer[T], error) {
