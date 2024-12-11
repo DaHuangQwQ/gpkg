@@ -3,23 +3,25 @@ package grpcx
 import (
 	"context"
 	"github.com/DaHuangQwQ/gpkg/grpcx/registry"
+	"google.golang.org/grpc/attributes"
 	"google.golang.org/grpc/resolver"
+	"strconv"
 	"time"
 )
 
-type grpcResolverBuilder struct {
+type GrpcResolverBuilder struct {
 	r       registry.Registry
 	timeout time.Duration
 }
 
-func NewRegistryBuilder(r registry.Registry, timeout time.Duration) (*grpcResolverBuilder, error) {
-	return &grpcResolverBuilder{
+func NewRegistryBuilder(r registry.Registry, timeout time.Duration) (*GrpcResolverBuilder, error) {
+	return &GrpcResolverBuilder{
 		r:       r,
 		timeout: timeout,
 	}, nil
 }
 
-func (b *grpcResolverBuilder) Build(target resolver.Target,
+func (b *GrpcResolverBuilder) Build(target resolver.Target,
 	cc resolver.ClientConn, opts resolver.BuildOptions) (resolver.Resolver, error) {
 	r := &grpcResolver{
 		cc:      cc,
@@ -32,7 +34,7 @@ func (b *grpcResolverBuilder) Build(target resolver.Target,
 	return r, nil
 }
 
-func (b *grpcResolverBuilder) Scheme() string {
+func (b *GrpcResolverBuilder) Scheme() string {
 	return "registry"
 }
 
@@ -76,7 +78,8 @@ func (g *grpcResolver) resolve() {
 	for _, si := range instances {
 		address = append(address,
 			resolver.Address{
-				Addr: si.Address,
+				Addr:       si.Address,
+				Attributes: attributes.New("weight", strconv.Itoa(int(si.Weight))),
 			})
 	}
 	err = g.cc.UpdateState(resolver.State{

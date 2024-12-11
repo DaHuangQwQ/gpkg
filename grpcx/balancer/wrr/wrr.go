@@ -7,13 +7,15 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"io"
+	"math"
+	"strconv"
 	"sync"
 )
 
 const name = "custom_wrr"
 
 func init() {
-	// NewBalancerBuilder 帮我们 PickerBuilder 转化为 BalanceBuilder
+	// NewBalancerBuilder 帮我们 PickerBuilder 转化为 BalancerBuilder
 	balancer.Register(base.NewBalancerBuilder("custom_wrr", &PickerBuilder{}, base.Config{HealthCheck: true}))
 }
 
@@ -21,23 +23,30 @@ type PickerBuilder struct {
 }
 
 func (p *PickerBuilder) Build(info base.PickerBuildInfo) balancer.Picker {
-	conns := make([]*conn, 0)
-	for subConn, info := range info.ReadySCs {
-		cc := &conn{cc: subConn, available: true}
-		md, ok := info.Address.Metadata.(map[string]any)
-		if ok {
-			weightVal := md["weight"]
-			weight, _ := weightVal.(float64)
-			cc.weight = int(weight)
+	if len(info.ReadySCs) == 0 {
+		return base.NewErrPicker(balancer.ErrNoSubConnAvailable)
+	}
+	conns := make([]*conn, 0, len(info.ReadySCs))
+	for subConn, connInfo := range info.ReadySCs {
+		weightStr := connInfo.Address.Attributes.Value("weight").(string)
+		weight, err := strconv.ParseInt(weightStr, 10, 64)
+		if err != nil {
+			weight = 1
 		}
-		cc.currentWeight = cc.weight
-		conns = append(conns, cc)
+
+		conns = append(conns, &conn{
+			weight:        uint32(weight),
+			currentWeight: uint32(weight),
+			cc:            subConn,
+			available:     true,
+		})
 	}
 	return &Picker{
 		conns: conns,
 	}
 }
 
+// Picker 平滑的加权轮询算法
 type Picker struct {
 	conns []*conn
 	mutex sync.Mutex
@@ -51,18 +60,18 @@ func (p *Picker) Pick(info balancer.PickInfo) (balancer.PickResult, error) {
 		return balancer.PickResult{}, balancer.ErrNoSubConnAvailable
 	}
 	var (
-		totalWeight int
+		totalWeight uint32
 		maxCC       *conn
 	)
 
-	for _, conn := range p.conns {
-		if conn.available == false {
+	for _, connInfo := range p.conns {
+		if connInfo.available == false {
 			continue
 		}
-		totalWeight += conn.weight
-		conn.currentWeight += conn.weight
-		if maxCC == nil || maxCC.currentWeight < conn.currentWeight {
-			maxCC = conn
+		totalWeight += connInfo.weight
+		connInfo.currentWeight += connInfo.weight
+		if maxCC == nil || maxCC.currentWeight < connInfo.currentWeight {
+			maxCC = connInfo
 		}
 	}
 
@@ -72,11 +81,21 @@ func (p *Picker) Pick(info balancer.PickInfo) (balancer.PickResult, error) {
 		SubConn: maxCC.cc,
 		Done: func(info balancer.DoneInfo) {
 			// 很多动态算法 根据结果来 调整权重
-			err := info.Err
-			if err == nil {
-
+			maxCC.mutex.Lock()
+			if info.Err != nil && maxCC.currentWeight == 0 {
+				return
 			}
-			switch err {
+			if info.Err == nil && maxCC.currentWeight == math.MaxUint32 {
+				return
+			}
+			if info.Err != nil {
+				maxCC.currentWeight--
+			} else {
+				maxCC.currentWeight++
+			}
+			maxCC.mutex.Unlock()
+
+			switch info.Err {
 			case context.Canceled:
 				return
 			case context.DeadlineExceeded:
@@ -86,7 +105,7 @@ func (p *Picker) Pick(info balancer.PickInfo) (balancer.PickResult, error) {
 				maxCC.available = false
 				return
 			default:
-				st, ok := status.FromError(err)
+				st, ok := status.FromError(info.Err)
 				if ok {
 					code := st.Code()
 					switch code {
@@ -123,8 +142,9 @@ func (p *Picker) healthCheck(cc *conn) bool {
 }
 
 type conn struct {
-	weight        int
-	currentWeight int
+	mutex         sync.Mutex
+	weight        uint32
+	currentWeight uint32
 	cc            balancer.SubConn
 	available     bool
 	// vip 节点 非 vip 节点 VIP节点全崩了 考虑挤占非VIP 节点

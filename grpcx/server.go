@@ -16,6 +16,9 @@ type Server struct {
 	Name string
 
 	registerTimeout time.Duration
+
+	// 负载均衡
+	weight uint32
 }
 
 func NewServer(name string, opts ...ServerOption) *Server {
@@ -43,6 +46,7 @@ func (s *Server) Start(addr string) error {
 		err = s.r.Register(ctx, registry.ServiceInstance{
 			Name:    s.Name,
 			Address: addr,
+			Weight:  s.weight,
 		})
 		if err != nil {
 			return err
@@ -63,5 +67,11 @@ func (s *Server) Close() error {
 func WithRegistry(r registry.Registry) ServerOption {
 	return func(server *Server) {
 		server.r = r
+	}
+}
+
+func WithWeight(w uint32) ServerOption {
+	return func(server *Server) {
+		server.weight = w
 	}
 }
