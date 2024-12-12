@@ -11,6 +11,8 @@ go get github.com/DaHuangQwQ/gpkg
 4. 可观测中间件
 5. 简化代码
 ```go
+package main
+
 import (
 	"github.com/DaHuangQwQ/gpkg/ginx"
 	"github.com/gin-gonic/gin"
@@ -50,6 +52,8 @@ func main() {
 6. 链路追踪
 7. 路由策略
 ```go
+package main
+
 import (
     "context"
     "github.com/DaHuangQwQ/gpkg/grpcx"
