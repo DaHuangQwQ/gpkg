@@ -4,7 +4,9 @@
 go get github.com/DaHuangQwQ/gpkg
 ```
 
-## gin
+## ginx
+样例代码
+https://github.com/DaHuangQwQ/gpkg/tree/main/ginx/example
 1. api文档生成
 2. jwt中间件
 3. 限流中间件
@@ -51,6 +53,7 @@ func main() {
 5. 熔断
 6. 链路追踪
 7. 路由策略
+8. 分组路由
 ```go
 package main
 
