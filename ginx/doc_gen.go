@@ -7,7 +7,7 @@ import (
 
 var Paths = make(map[string]api.Path)
 
-func DocGen(req any) {
+func docGen(req any) {
 	var (
 		path       string
 		title      string

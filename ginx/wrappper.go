@@ -27,7 +27,7 @@ func WarpWithToken[Req any](fn func(ctx *gin.Context, req Req, u UserClaims) (Re
 			method = field.Tag.Get("method")
 		}
 	}
-	DocGen(req)
+	docGen(req)
 	return method, path, func(ctx *gin.Context) {
 		var req Req
 		if err := ctx.Bind(&req); err != nil {
@@ -71,7 +71,7 @@ func Warp[Req any](fn func(ctx *gin.Context, req Req) (Result, error)) (string, 
 			method = field.Tag.Get("method")
 		}
 	}
-	DocGen(req)
+	docGen(req)
 	return method, path, func(ctx *gin.Context) {
 		var req Req
 		if err := ctx.Bind(&req); err != nil {

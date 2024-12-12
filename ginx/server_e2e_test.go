@@ -8,9 +8,9 @@ import (
 )
 
 func TestServer(t *testing.T) {
-	server := NewServer(":8080")
+	server := NewServer()
 	server.Handle(Warp[UserGetReq](getUser))
-	_ = server.Start()
+	_ = server.Start(":8080")
 }
 
 func getUser(ctx *gin.Context, req UserGetReq) (Result, error) {

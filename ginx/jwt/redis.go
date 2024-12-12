@@ -11,18 +11,32 @@ import (
 	"time"
 )
 
+var _ Handler = &RedisJWTHandler{}
+
+type RedisJWTOption func(*RedisJWTHandler)
+
 type RedisJWTHandler struct {
 	client        redis.Cmdable
 	signingMethod jwt.SigningMethod
 	rcExpiration  time.Duration
+
+	JWTKey   []byte
+	RCJWTKey []byte
 }
 
-func NewRedisJWTHandler(client redis.Cmdable) Handler {
-	return &RedisJWTHandler{
+func NewRedisJWTHandler(JWTKey, RCJWTKey []byte, rcExpiration time.Duration, client redis.Cmdable, opts ...RedisJWTOption) Handler {
+	res := &RedisJWTHandler{
 		client:        client,
 		signingMethod: jwt.SigningMethodHS512,
-		rcExpiration:  time.Hour * 24 * 7,
+		rcExpiration:  rcExpiration,
+
+		JWTKey:   JWTKey,
+		RCJWTKey: RCJWTKey,
 	}
+	for _, opt := range opts {
+		opt(res)
+	}
+	return res
 }
 
 func (h *RedisJWTHandler) CheckSession(ctx *gin.Context, ssid string) error {
@@ -54,8 +68,6 @@ func (h *RedisJWTHandler) ExtractToken(ctx *gin.Context) string {
 	return segs[1]
 }
 
-var _ Handler = &RedisJWTHandler{}
-
 func (h *RedisJWTHandler) SetLoginToken(ctx *gin.Context, uid int64) error {
 	ssid := uuid.New().String()
 	err := h.setRefreshToken(ctx, uid, ssid)
@@ -86,11 +98,24 @@ func (h *RedisJWTHandler) SetJWTToken(ctx *gin.Context, uid int64, ssid string) 
 		},
 	}
 	token := jwt.NewWithClaims(h.signingMethod, uc)
-	tokenStr, err := token.SignedString(JWTKey)
+	tokenStr, err := token.SignedString(h.JWTKey)
 	if err != nil {
 		return err
 	}
 	ctx.Header("x-jwt-token", tokenStr)
+	return nil
+}
+
+func (h *RedisJWTHandler) ParseWithClaims(tokenStr string, claims jwt.Claims) error {
+	token, err := jwt.ParseWithClaims(tokenStr, claims, func(token *jwt.Token) (interface{}, error) {
+		return h.JWTKey, nil
+	})
+	if err != nil {
+		return err
+	}
+	if !token.Valid {
+		return errors.New("token is invalid")
+	}
 	return nil
 }
 
@@ -103,7 +128,7 @@ func (h *RedisJWTHandler) setRefreshToken(ctx *gin.Context, uid int64, ssid stri
 		},
 	}
 	token := jwt.NewWithClaims(h.signingMethod, rc)
-	tokenStr, err := token.SignedString(RCJWTKey)
+	tokenStr, err := token.SignedString(h.RCJWTKey)
 	if err != nil {
 		return err
 	}
@@ -111,18 +136,8 @@ func (h *RedisJWTHandler) setRefreshToken(ctx *gin.Context, uid int64, ssid stri
 	return nil
 }
 
-var JWTKey = []byte("k6CswdUm77WKcbM68UQUuxVsHSpTCwgK")
-var RCJWTKey = []byte("k6CswdUm77WKcbM68UQUuxVsHSpTCwgA")
-
-type RefreshClaims struct {
-	jwt.RegisteredClaims
-	Uid  int64
-	Ssid string
-}
-
-type UserClaims struct {
-	jwt.RegisteredClaims
-	Uid       int64
-	Ssid      string
-	UserAgent string
+func RedisJWTWithSigningMethod(signingMethod jwt.SigningMethod) RedisJWTOption {
+	return func(ctx *RedisJWTHandler) {
+		ctx.signingMethod = signingMethod
+	}
 }
