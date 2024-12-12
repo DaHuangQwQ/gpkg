@@ -1,19 +1,9 @@
 package ginx
 
 import (
-	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/prometheus/client_golang/prometheus"
 )
-
-type Server struct {
-	*gin.Engine
-	Addr string
-}
-
-func (s *Server) Start() error {
-	return s.Engine.Run(s.Addr)
-}
 
 var vector *prometheus.CounterVec
 

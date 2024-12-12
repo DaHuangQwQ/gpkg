@@ -13,20 +13,22 @@ func NewWarpLogger(l logger.Logger) {
 	L = l
 }
 
-func WarpWithToken[Req any](fn func(ctx *gin.Context, req Req, u UserClaims) (Result, error)) (string, gin.HandlerFunc) {
+func WarpWithToken[Req any](fn func(ctx *gin.Context, req Req, u UserClaims) (Result, error)) (string, string, gin.HandlerFunc) {
 	var (
-		path string
-		req  Req
+		method string
+		path   string
+		req    Req
 	)
 	t := reflect.TypeOf(req)
 	for i := 0; i < t.NumField(); i++ {
 		field := t.Field(i)
 		if field.Name == "Meta" {
 			path = field.Tag.Get("path")
+			method = field.Tag.Get("method")
 		}
 	}
 	DocGen(req)
-	return path, func(ctx *gin.Context) {
+	return method, path, func(ctx *gin.Context) {
 		var req Req
 		if err := ctx.Bind(&req); err != nil {
 			ctx.JSON(http.StatusOK, Result{
@@ -55,20 +57,22 @@ func WarpWithToken[Req any](fn func(ctx *gin.Context, req Req, u UserClaims) (Re
 	}
 }
 
-func Warp[Req any](fn func(ctx *gin.Context, req Req) (Result, error)) (string, gin.HandlerFunc) {
+func Warp[Req any](fn func(ctx *gin.Context, req Req) (Result, error)) (string, string, gin.HandlerFunc) {
 	var (
-		path string
-		req  Req
+		method string
+		path   string
+		req    Req
 	)
 	t := reflect.TypeOf(req)
 	for i := 0; i < t.NumField(); i++ {
 		field := t.Field(i)
 		if field.Name == "Meta" {
 			path = field.Tag.Get("path")
+			method = field.Tag.Get("method")
 		}
 	}
 	DocGen(req)
-	return path, func(ctx *gin.Context) {
+	return method, path, func(ctx *gin.Context) {
 		var req Req
 		if err := ctx.Bind(&req); err != nil {
 			ctx.JSON(http.StatusOK, Result{
@@ -93,6 +97,8 @@ type Result struct {
 	Msg  string `json:"msg"`
 	Data any    `json:"data"`
 }
+
+type Meta struct{}
 
 func Wrap(fn func(c *gin.Context) (Result, error)) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
