@@ -1,6 +1,9 @@
 package ratelimit
 
-import "context"
+import (
+	"context"
+	"errors"
+)
 
 type Limiter interface {
 	// Limit key 是限流对象， 一般是ip地址
@@ -8,3 +11,7 @@ type Limiter interface {
 	// 返回 true，就是触发限流
 	Limit(ctx context.Context, key string) (bool, error)
 }
+
+var (
+	ErrLimitExceeded = errors.New("rate limit exceeded")
+)

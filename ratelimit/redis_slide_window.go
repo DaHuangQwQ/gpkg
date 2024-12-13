@@ -7,25 +7,25 @@ import (
 	"time"
 )
 
-//go:embed slide_window.lua
-var luaScript string
+//go:embed lua/slide_window.lua
+var luaSlideScript string
 
-type RedisSlidingWindowLimiter struct {
-	cmd      redis.Cmdable
+type redisSlidingWindowLimiter struct {
+	client   redis.Cmdable
 	interval time.Duration
 	// 阈值
 	rate int
 }
 
-func NewRedisSlidingWindowLimiter(cmd redis.Cmdable, interval time.Duration, rate int) *RedisSlidingWindowLimiter {
-	return &RedisSlidingWindowLimiter{
-		cmd:      cmd,
+func NewRedisSlidingWindowLimiter(client redis.Cmdable, interval time.Duration, rate int) Limiter {
+	return &redisSlidingWindowLimiter{
+		client:   client,
 		interval: interval,
 		rate:     rate,
 	}
 }
 
-func (b *RedisSlidingWindowLimiter) Limit(ctx context.Context, key string) (bool, error) {
-	return b.cmd.Eval(ctx, luaScript, []string{key},
+func (b *redisSlidingWindowLimiter) Limit(ctx context.Context, key string) (bool, error) {
+	return b.client.Eval(ctx, luaSlideScript, []string{key},
 		b.interval.Milliseconds(), b.rate, time.Now().UnixMilli()).Bool()
 }

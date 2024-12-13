@@ -54,6 +54,8 @@ func main() {
 6. 链路追踪
 7. 路由策略
 8. 分组路由
+9. 组播
+10. 广播
 ```go
 package main
 
@@ -101,6 +103,9 @@ func main() {
 获取本机ip
 ## ratelimit
 - 滑动窗口算法
+- 固定窗口算法
+- 令牌桶算法
+- 漏桶算法
 ## redis
 - 可观测中间件
 ## sarama
