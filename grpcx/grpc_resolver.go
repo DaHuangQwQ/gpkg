@@ -79,7 +79,7 @@ func (g *grpcResolver) resolve() {
 		address = append(address,
 			resolver.Address{
 				Addr:       si.Address,
-				Attributes: attributes.New("weight", strconv.Itoa(int(si.Weight))),
+				Attributes: attributes.New("weight", strconv.Itoa(int(si.Weight))).WithValue("group", si.Group),
 			})
 	}
 	err = g.cc.UpdateState(resolver.State{

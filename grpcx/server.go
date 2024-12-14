@@ -19,6 +19,7 @@ type Server struct {
 
 	// 负载均衡
 	weight uint32
+	group  string
 }
 
 func NewServer(name string, opts ...ServerOption) *Server {
@@ -47,6 +48,7 @@ func (s *Server) Start(addr string) error {
 			Name:    s.Name,
 			Address: addr,
 			Weight:  s.weight,
+			Group:   s.group,
 		})
 		if err != nil {
 			return err
@@ -73,5 +75,11 @@ func WithRegistry(r registry.Registry) ServerOption {
 func WithWeight(w uint32) ServerOption {
 	return func(server *Server) {
 		server.weight = w
+	}
+}
+
+func WithGroup(group string) ServerOption {
+	return func(server *Server) {
+		server.group = group
 	}
 }

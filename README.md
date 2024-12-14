@@ -93,19 +93,15 @@ func main() {
     _ = server.Start(":8082")
 }
 ```
-## logger
-简化代码
-## migrator
-不停机数据迁移方案
-- 全量修复
-- 增量修复
-## net
-获取本机ip
 ## ratelimit
 - 滑动窗口算法
 - 固定窗口算法
 - 令牌桶算法
 - 漏桶算法
+## migrator
+不停机数据迁移方案
+- 全量修复
+- 增量修复
 ## redis
 - 可观测中间件
 ## sarama
@@ -115,3 +111,7 @@ func main() {
 - 简化代码
 ## canal
 1. 定义统一接口
+## logger
+简化代码
+## net
+获取本机ip
