@@ -21,15 +21,14 @@ type Registry struct {
 }
 
 func NewRegistry(etcd *clientv3.Client) (*Registry, error) {
-	res := &Registry{
-		etcd: etcd,
-	}
-	var err error
-	res.session, err = concurrency.NewSession(etcd)
+	session, err := concurrency.NewSession(etcd)
 	if err != nil {
 		return nil, err
 	}
-	return res, nil
+	return &Registry{
+		etcd:    etcd,
+		session: session,
+	}, nil
 }
 
 func (r *Registry) Register(ctx context.Context, si registry.ServiceInstance) error {
@@ -62,7 +61,7 @@ func (r *Registry) ListServices(ctx context.Context, serviceName string) ([]regi
 	return res, nil
 }
 
-func (r *Registry) Subscribe(serviceName string) (<-chan registry.Event, error) {
+func (r *Registry) Subscribe(serviceName string) <-chan registry.Event {
 	ctx, cancel := context.WithCancel(context.Background())
 
 	r.mutex.Lock()
@@ -78,7 +77,7 @@ func (r *Registry) Subscribe(serviceName string) (<-chan registry.Event, error) 
 			select {
 			case resp := <-watch:
 				if resp.Err() != nil {
-					return
+					continue
 				}
 				if resp.Canceled {
 					return
@@ -92,7 +91,7 @@ func (r *Registry) Subscribe(serviceName string) (<-chan registry.Event, error) 
 		}
 	}()
 
-	return res, nil
+	return res
 }
 
 func (r *Registry) Close() error {

@@ -3,10 +3,12 @@ package grpcx
 import (
 	"context"
 	"fmt"
-	//_ "github.com/DaHuangQwQ/gpkg/grpcx/balancer/round_robin"
+	_ "github.com/DaHuangQwQ/gpkg/grpcx/balancer/round_robin"
 	_ "github.com/DaHuangQwQ/gpkg/grpcx/balancer/wrr"
 	"github.com/DaHuangQwQ/gpkg/grpcx/registry"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/balancer"
+	"google.golang.org/grpc/balancer/base"
 	"time"
 )
 
@@ -17,7 +19,7 @@ type Client struct {
 	r        registry.Registry
 	timeout  time.Duration
 
-	balancer string
+	balancer balancer.Builder
 }
 
 func NewClient(opts ...ClientOption) (*Client, error) {
@@ -45,8 +47,8 @@ func (c *Client) Dial(ctx context.Context, service string, dialOptions ...grpc.D
 	if len(dialOptions) > 0 {
 		opts = append(opts, dialOptions...)
 	}
-	if c.balancer != "" {
-		opts = append(opts, grpc.WithDefaultServiceConfig(fmt.Sprintf(`{"loadBalancingConfig": [{"%s":{}}]}`, c.balancer)))
+	if c.balancer != nil {
+		opts = append(opts, grpc.WithDefaultServiceConfig(fmt.Sprintf(`{"LoadBalancingPolicy": "%s"}`, c.balancer.Name())))
 	}
 
 	return grpc.DialContext(ctx, fmt.Sprintf("registry:///%s", service), opts...)
@@ -64,8 +66,9 @@ func ClientWithRegistry(r registry.Registry, timeout time.Duration) ClientOption
 	}
 }
 
-func ClientWithBalancer(s string) ClientOption {
+func ClientWithBalancer(name string, pb base.PickerBuilder) ClientOption {
 	return func(c *Client) {
-		c.balancer = s
+		c.balancer = base.NewBalancerBuilder(name, pb, base.Config{HealthCheck: true})
+		balancer.Register(c.balancer)
 	}
 }

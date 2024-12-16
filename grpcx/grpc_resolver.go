@@ -9,6 +9,10 @@ import (
 	"time"
 )
 
+func init() {
+	resolver.Register(&GrpcResolverBuilder{})
+}
+
 type GrpcResolverBuilder struct {
 	r       registry.Registry
 	timeout time.Duration
@@ -28,6 +32,7 @@ func (b *GrpcResolverBuilder) Build(target resolver.Target,
 		r:       b.r,
 		target:  target,
 		timeout: b.timeout,
+		close:   make(chan struct{}, 1),
 	}
 	r.resolve()
 	go r.watch()
@@ -51,11 +56,7 @@ func (g *grpcResolver) ResolveNow(options resolver.ResolveNowOptions) {
 }
 
 func (g *grpcResolver) watch() {
-	events, err := g.r.Subscribe(g.target.Endpoint())
-	if err != nil {
-		g.cc.ReportError(err)
-		return
-	}
+	events := g.r.Subscribe(g.target.Endpoint())
 	for {
 		select {
 		case <-events:
@@ -79,7 +80,8 @@ func (g *grpcResolver) resolve() {
 		address = append(address,
 			resolver.Address{
 				Addr:       si.Address,
-				Attributes: attributes.New("weight", strconv.Itoa(int(si.Weight))).WithValue("group", si.Group),
+				ServerName: si.Name,
+				Attributes: attributes.New("weight", strconv.Itoa(int(si.Weight))),
 			})
 	}
 	err = g.cc.UpdateState(resolver.State{

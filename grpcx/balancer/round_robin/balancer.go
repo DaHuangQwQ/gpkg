@@ -11,11 +11,15 @@ import (
 const name = "round_robin"
 
 func init() {
-	balancer.Register(base.NewBalancerBuilder(name, &PickerBuilder{}, base.Config{HealthCheck: true}))
+	balancer.Register(base.NewBalancerBuilder(name, &PickerBuilder{
+		Filter: func(info balancer.PickInfo, addr resolver.Address) bool {
+			return true
+		},
+	}, base.Config{HealthCheck: true}))
 }
 
 type PickerBuilder struct {
-	filter balance.Filter
+	Filter balance.Filter
 }
 
 func (b *PickerBuilder) Build(info base.PickerBuildInfo) balancer.Picker {
@@ -30,7 +34,7 @@ func (b *PickerBuilder) Build(info base.PickerBuildInfo) balancer.Picker {
 	return &Balancer{
 		index:       0,
 		connections: connections,
-		filter:      b.filter,
+		filter:      b.Filter,
 	}
 }
 
