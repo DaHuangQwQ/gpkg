@@ -105,8 +105,10 @@ func main() {
 ## redis
 - 可观测中间件
 ## sarama
+kafka 消息队列
 - 简化代码
 - kafka分批处理
+- 延时队列
 ## app
 - 简化代码
 ## canal
