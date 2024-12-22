@@ -1,19 +1,23 @@
 package ginx
 
 import (
+	"github.com/DaHuangQwQ/gpkg/ginx/openapi"
 	"github.com/DaHuangQwQ/gpkg/logger"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"reflect"
 )
 
-var L logger.Logger
+var (
+	L   logger.Logger
+	Oai = openapi.NewOpenAPI()
+)
 
 func NewWarpLogger(l logger.Logger) {
 	L = l
 }
 
-func WarpWithToken[Req any](fn func(ctx *gin.Context, req Req, u UserClaims) (Result, error)) (string, string, gin.HandlerFunc) {
+func WrapWithToken[Req any, Res any](fn func(ctx *gin.Context, req Req, u UserClaims) (Result[Res], error)) (string, string, gin.HandlerFunc) {
 	var (
 		method string
 		path   string
@@ -27,11 +31,25 @@ func WarpWithToken[Req any](fn func(ctx *gin.Context, req Req, u UserClaims) (Re
 			method = field.Tag.Get("method")
 		}
 	}
-	docGen(req)
+
+	route := openapi.Route[Res, Req]{
+		Operation:            nil,
+		FullName:             "",
+		Path:                 path,
+		AcceptedContentTypes: nil,
+		DefaultStatusCode:    0,
+		Method:               method,
+		Middlewares:          nil,
+	}
+	err := route.RegisterOpenAPIOperation(Oai)
+	if err != nil {
+		panic(err)
+	}
+
 	return method, path, func(ctx *gin.Context) {
 		var req Req
 		if err := ctx.Bind(&req); err != nil {
-			ctx.JSON(http.StatusOK, Result{
+			ctx.JSON(http.StatusOK, Result[Res]{
 				Code: 5,
 				Msg:  "参数错误" + err.Error(),
 			})
@@ -57,7 +75,7 @@ func WarpWithToken[Req any](fn func(ctx *gin.Context, req Req, u UserClaims) (Re
 	}
 }
 
-func Warp[Req any](fn func(ctx *gin.Context, req Req) (Result, error)) (string, string, gin.HandlerFunc) {
+func Wrap[Req any, Res any](fn func(ctx *gin.Context, req Req) (Result[Res], error)) (string, string, gin.HandlerFunc) {
 	var (
 		method string
 		path   string
@@ -71,11 +89,25 @@ func Warp[Req any](fn func(ctx *gin.Context, req Req) (Result, error)) (string, 
 			method = field.Tag.Get("method")
 		}
 	}
-	docGen(req)
+
+	route := openapi.Route[Res, Req]{
+		Operation:            nil,
+		FullName:             "",
+		Path:                 path,
+		AcceptedContentTypes: nil,
+		DefaultStatusCode:    0,
+		Method:               method,
+		Middlewares:          nil,
+	}
+	err := route.RegisterOpenAPIOperation(Oai)
+	if err != nil {
+		panic(err)
+	}
+
 	return method, path, func(ctx *gin.Context) {
 		var req Req
 		if err := ctx.Bind(&req); err != nil {
-			ctx.JSON(http.StatusOK, Result{
+			ctx.JSON(http.StatusOK, Result[Res]{
 				Code: 5,
 				Msg:  "参数错误" + err.Error(),
 			})
@@ -92,22 +124,10 @@ func Warp[Req any](fn func(ctx *gin.Context, req Req) (Result, error)) (string, 
 	}
 }
 
-type Result struct {
+type Result[T any] struct {
 	Code int    `json:"code"`
 	Msg  string `json:"msg"`
-	Data any    `json:"data"`
+	Data T      `json:"data"`
 }
 
 type Meta struct{}
-
-func Wrap(fn func(c *gin.Context) (Result, error)) gin.HandlerFunc {
-	return func(ctx *gin.Context) {
-		result, err := fn(ctx)
-		if err != nil {
-			ctx.JSON(http.StatusOK, result)
-			L.Info("系统错误", logger.Field{Key: "err", Val: err})
-			return
-		}
-		ctx.JSON(http.StatusOK, result)
-	}
-}
