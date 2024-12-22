@@ -32,7 +32,7 @@ func WrapWithToken[Req any, Res any](fn func(ctx *gin.Context, req Req, u UserCl
 		}
 	}
 
-	route := openapi.Route[Res, Req]{
+	route := openapi.Path[Res, Req]{
 		Operation:            nil,
 		FullName:             "",
 		Path:                 path,
@@ -90,7 +90,7 @@ func Wrap[Req any, Res any](fn func(ctx *gin.Context, req Req) (Result[Res], err
 		}
 	}
 
-	route := openapi.Route[Res, Req]{
+	route := openapi.Path[Res, Req]{
 		Operation:            nil,
 		FullName:             "",
 		Path:                 path,
