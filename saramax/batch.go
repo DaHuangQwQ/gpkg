@@ -10,12 +10,12 @@ import (
 )
 
 type BatchHandler[T any] struct {
-	fn func(msgs []*sarama.ConsumerMessage, ts []T) error
+	fn BatchHandlerFunc[T]
 	l  logger.Logger
 }
 
 // NewBatchHandler kafka 批量消费
-func NewBatchHandler[T any](l logger.Logger, fn func(msgs []*sarama.ConsumerMessage, ts []T) error) *BatchHandler[T] {
+func NewBatchHandler[T any](l logger.Logger, fn BatchHandlerFunc[T]) *BatchHandler[T] {
 	return &BatchHandler[T]{fn: fn, l: l}
 }
 
