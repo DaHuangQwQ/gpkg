@@ -5,41 +5,10 @@ go get github.com/DaHuangQwQ/gpkg
 ```
 
 ## ginx
-样例代码
-https://github.com/DaHuangQwQ/gpkg/tree/main/ginx/example
-1. api文档生成
-2. jwt中间件
-3. 限流中间件
-4. 可观测中间件
-5. 简化代码
-```go
-package main
 
-import (
-	"github.com/DaHuangQwQ/gpkg/ginx"
-	"github.com/gin-gonic/gin"
-)
+移至其他仓库
+https://github.com/DaHuangQwQ/ginx
 
-type UserGetReq struct {
-	ginx.Meta `method:"GET" path:"users/:id"`
-	Id        int `json:"id"`
-}
-
-func getUser(ctx *gin.Context, req UserGetReq) (ginx.Result, error) {
-	return ginx.Result{
-		Code: 0,
-		Msg:  "ok",
-		Data: "hello",
-	}, nil
-}
-
-func main() {
-	server := ginx.NewServer(":8080")
-	server.Handle(ginx.Warp[UserGetReq](getUser))
-	_ = server.Start()
-}
-
-```
 ## gorm
 1. 可观测中间件
 2. 双写
